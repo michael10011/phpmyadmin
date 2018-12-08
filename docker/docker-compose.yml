@@ -1,0 +1,41 @@
+version: '3.1'
+
+services:
+    app:
+        container_name: PHP_MY_ADMIN
+        build: .
+        volumes:
+            - ../:/app
+        environment:
+          PMA_HOST: mysql
+          PMA_PORT: 3306
+        networks:
+          - php-network
+
+    nginx:
+      container_name: Nginx
+      image: nginx:latest
+      volumes:
+        - ./config/nginx/site.conf:/etc/nginx/conf.d/site.conf
+        - ../:/app
+      ports:
+        - 8080:80
+      restart: always
+      links:
+        - app
+      networks:
+        - php-network
+
+    mysql:
+      image: mysql
+      command: --default-authentication-plugin=mysql_native_password
+      restart: always
+      environment:
+        MYSQL_USER: root
+        MYSQL_ROOT_PASSWORD: root
+      networks:
+        - php-network
+
+networks:
+    php-network:
+      driver: bridge
